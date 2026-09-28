@@ -10,7 +10,7 @@ sequenceDiagram
     participant FE as Frontend (React UI)
     participant BE as Backend API (.NET REST)
     participant AI as Servicio IA / OCR (Gemini Flash)
-    participant DB as Base de Datos (SQL Server)
+    participant DB as Base de Datos (MySQL)
 
     Note over U,DB: Fase 1: Interacción de Carga y Validación Inicial
     U->>FE: Ingresa correo y adjunta imagen (JPG/PNG)

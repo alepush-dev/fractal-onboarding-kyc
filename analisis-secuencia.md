@@ -6,11 +6,11 @@ Este diagrama detalla de forma gráfica y secuencial el flujo extremo a extremo 
 sequenceDiagram
     autonumber
     
-    actor U as 👤 Usuario / Cliente
-    participant FE as 🖥️ Frontend<br/>(Angular UI)
-    participant BE as ⚙️ Backend API<br/>(.NET REST)
-    participant AI as 🤖 Servicio IA / OCR<br/>(Gemini Flash)
-    participant DB as 💾 Base de Datos<br/>(SQL Server)
+    actor U as Usuario / Cliente
+    participant FE as Frontend (Angular UI)
+    participant BE as Backend API (.NET REST)
+    participant AI as Servicio IA / OCR (Gemini Flash)
+    participant DB as Base de Datos (SQL Server)
 
     Note over U,DB: Fase 1: Interacción de Carga y Validación Inicial
     U->>FE: Ingresa correo y adjunta imagen (JPG/PNG)
@@ -42,10 +42,3 @@ sequenceDiagram
         FE-->>U: Renderiza pantalla de éxito con resultado extraído
     end
     deactivate BE
-
-    %% Estilos visuales únicos para destacar el diagrama
-    style U fill:#f9f,stroke:#333,stroke-width:2px
-    style FE fill:#bbf,stroke:#333,stroke-width:2px
-    style BE fill:#bfb,stroke:#333,stroke-width:2px
-    style AI fill:#ff9,stroke:#333,stroke-width:2px
-    style DB fill:#fbb,stroke:#333,stroke-width:2px

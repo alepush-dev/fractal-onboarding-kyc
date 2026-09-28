@@ -1,13 +1,13 @@
-# 🚀 Arquitectura y Análisis de Secuencia - Onboarding Digital Mini KYC
+#  Diagrama de Secuencia - Onboarding Digital Mini KYC
 
-Este diagrama detalla de forma gráfica y secuencial el flujo extremo a extremo implementado en el sistema para la validación y persistencia inteligente de documentos de identidad.
+## Analisis de Secuencia
 
 ```mermaid
 sequenceDiagram
     autonumber
     
     actor U as Usuario / Cliente
-    participant FE as Frontend (Angular UI)
+    participant FE as Frontend (React UI)
     participant BE as Backend API (.NET REST)
     participant AI as Servicio IA / OCR (Gemini Flash)
     participant DB as Base de Datos (SQL Server)

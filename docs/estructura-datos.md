@@ -13,8 +13,9 @@ La entidad principal almacena la trazabilidad de cada registro procesado por el 
 - `ImageUrl` (TEXT, Nullable) — URL o ruta de almacenamiento de la imagen adjunta.
 - `CreatedAt` (DATETIME, Default = CURRENT_TIMESTAMP) — Marca de tiempo exacta de la creación del registro.
 
-### Script de Creación de la Tabla:
+
 ```sql
+-- 1. Creación de la tabla principal de Onboarding
 CREATE TABLE ClientsKyc (
     Id INT AUTO_INCREMENT PRIMARY KEY,
     Email VARCHAR(150) NOT NULL,
@@ -24,3 +25,22 @@ CREATE TABLE ClientsKyc (
     ImageUrl TEXT NULL,
     CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP
 );
+
+-- 2. Creación del Stored Procedure para la inserción segura
+DELIMITER //
+
+CREATE PROCEDURE sp_InsertOnboardingRecord (
+    IN p_Email VARCHAR(150),
+    IN p_FullName VARCHAR(250),
+    IN p_DocumentNumber VARCHAR(50),
+    IN p_OcrConfidence DECIMAL(5,2),
+    IN p_ImageUrl TEXT
+)
+BEGIN
+    INSERT INTO ClientsKyc (Email, FullName, DocumentNumber, OcrConfidence, ImageUrl, CreatedAt)
+    VALUES (p_Email, p_FullName, p_DocumentNumber, p_OcrConfidence, p_ImageUrl, NOW());
+    
+    SELECT LAST_INSERT_ID() AS NewId;
+END //
+
+DELIMITER ;

@@ -1,6 +1,6 @@
 # Diagrama de Secuencia - Onboarding Digital Mini KYC
-
-##Analisis de Secuencia
+-----------------------------------------
+## Analisis de Secuencia
 
 ```mermaid
 sequenceDiagram

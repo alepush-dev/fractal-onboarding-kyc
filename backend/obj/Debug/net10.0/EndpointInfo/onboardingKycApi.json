@@ -1,0 +1,72 @@
+{
+  "openapi": "3.1.1",
+  "info": {
+    "title": "onboardingKycApi | v1",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://localhost:51923"
+    },
+    {
+      "url": "http://localhost:51924"
+    }
+  ],
+  "paths": {
+    "/api/Kyc/process": {
+      "post": {
+        "tags": [
+          "Kyc"
+        ],
+        "requestBody": {
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "Email": {
+                    "type": "string"
+                  },
+                  "ImageFile": {
+                    "$ref": "#/components/schemas/IFormFile"
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/Kyc/records": {
+      "get": {
+        "tags": [
+          "Kyc"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "IFormFile": {
+        "type": "string",
+        "format": "binary"
+      }
+    }
+  },
+  "tags": [
+    {
+      "name": "Kyc"
+    }
+  ]
+}

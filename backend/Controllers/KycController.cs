@@ -39,7 +39,7 @@ namespace onboardingKycApi.Controllers
 
 
                 //Nos conectamos a MySQL para registrar los datos usando el Stored Procedure
-                string connectionString = _configuration.GetConnectionString("MySqlDb");
+                string connectionString = _configuration.GetConnectionString("DefaultConnection");
 
                 using (MySqlConnection connection = new MySqlConnection(connectionString))
                 {

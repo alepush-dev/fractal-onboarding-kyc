@@ -1,0 +1,33 @@
+[
+  {
+    "ContainingType": "onboardingKycApi.Controllers.KycController",
+    "Method": "ProcessKyc",
+    "RelativePath": "api/Kyc/process",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "Email",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "ImageFile",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "IsRequired": false
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "onboardingKycApi.Controllers.KycController",
+    "Method": "GetRecords",
+    "RelativePath": "api/Kyc/records",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  }
+]

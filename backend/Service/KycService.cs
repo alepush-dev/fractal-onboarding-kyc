@@ -190,7 +190,7 @@ namespace onboardingKycApi.Service
         public async Task<IEnumerable<KycResponseModel>> ObtenerRegistrosAsync()
         {
             var listaRegistros = new List<KycResponseModel>();
-            string connectionString = _configuration.GetConnectionString("MySqlDb");
+            string connectionString = _configuration.GetConnectionString("DefaultConnection");
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {

@@ -1,0 +1,55 @@
+# AI & Code Assistant Prompts (PROMPTS.md)
+
+Este documento recopila el historial oficial de consultas y prompts utilizados con servicios de Inteligencia Artificial, motores de OCR y asistentes de código a lo largo del desarrollo del sistema **Onboarding KYC**.
+
+---
+
+### 1. Integración de Google Gemini Flash para OCR
+* **Prompt:** 
+  > *"Act as a senior .NET backend engineer. Provide a C# service implementation using the official Google Gen AI SDK to send an image stream, extract structured KYC data (Full Name, DNI number, and confidence score), and return it in a strongly-typed model using Gemini Flash."*
+* **Propósito:** Configurar el cliente de Gemini y estructurar el prompt del sistema para procesar documentos de identidad mediante visión por computadora.
+
+### 2. Procesamiento de Respuestas No Estructuradas de la IA
+* **Prompt:** 
+  > *"The Gemini Flash API is returning the extracted JSON wrapped inside markdown code blocks (` ```json ... ``` `). Write a robust C# helper method using regular expressions to strip the formatting tags and safely deserialize the payload into my `KycExtractionResult` model."*
+* **Propósito:** Manejar y limpiar el formato de salida devuelto por el modelo para evitar errores de deserialización en el backend de ASP.NET Core.
+
+### 3. Visualización y Renderizado de Archivos en el Frontend
+* **Prompt:** 
+  > *"I am building a React frontend with Tailwind CSS and Bootstrap. How can I implement a dynamic preview component that reads an uploaded image file via FileReader or URL.createObjectURL and displays it cleanly alongside the extraction results table?"*
+* **Propósito:** Resolver problemas de renderizado y vista previa de documentos de identidad cargados por el usuario antes de enviar la solicitud al Web API.
+
+### 4. Conexión y Configuración del Túnel de Base de Datos en Railway
+* **Prompt:** 
+  > *"Provide the exact Railway CLI command sequence to open a secure local TCP tunnel to a deployed MySQL database service, and show how to format the connection string parameters for local development in `appsettings.json`."*
+* **Propósito:** Establecer comunicación directa entre el entorno local y la base de datos alojada en la nube para pruebas y migraciones de datos.
+
+### 5. Depuración y Limpieza Masiva de Registros Duplicados en MySQL
+* **Prompt:** 
+  > *"Write an SQL query to delete duplicate rows from a `clientskyc` table where the `FullName` matches, keeping only the record with the maximum ID, while avoiding MySQL Error 1175 (safe update mode)."*
+* **Propósito:** Solucionar conflictos de duplicidad de datos en la base de datos relacional y asegurar la integridad de los registros de prueba.
+
+### 6. Restablecimiento de Secuencias Auto-Incrementables
+* **Prompt:** 
+  > *"How do I alter a MySQL table's auto-increment sequence after manually updating or deleting primary keys to ensure new records continue sequentially without gaps?"*
+* **Propósito:** Mantener el orden lógico de los identificadores únicos tras realizar limpiezas de datos en la tabla principal.
+
+### 7. Configuración de Políticas de CORS en ASP.NET Core
+* **Prompt:** 
+  > *"Configure a flexible CORS policy in `Program.cs` for an ASP.NET Core Web API that allows incoming requests from a React frontend running on local Vite development ports as well as the production deployment domain."*
+* **Propósito:** Garantizar la comunicación fluida entre el cliente web y el backend sin bloqueos por políticas de seguridad del navegador.
+
+### 8. Gestión de Secretos y Configuración Segura con Git
+* **Prompt:** 
+  > *"Explain the best practices for handling sensitive configurations in .NET, and provide instructions on how to remove an accidentally committed `appsettings.json` file from Git tracking without losing local changes."*
+* **Propósito:** Proteger credenciales de API y cadenas de conexión para evitar bloqueos por parte de los escáneres de seguridad de GitHub Push Protection.
+
+### 9. Diseño de Patrones de Arquitectura para el Acceso a Datos
+* **Prompt:** 
+  > *"Compare the implementation of Repository pattern versus Entity Framework Core DbContext direct injection in a layered ASP.NET Core application, recommending the most maintainable approach for a lightweight KYC verification service."*
+* **Propósito:** Definir la arquitectura limpia del backend para optimizar la mantenibilidad del código y la escalabilidad del sistema.
+
+### 10. Optimización de Consultas y Procedimientos Almacenados
+* **Prompt:** 
+  > *"Write a MySQL stored procedure `sp_InsertOnboardingRecord` that accepts KYC extraction parameters, validates existing DNI entries to prevent race conditions, and logs the transaction timestamp."*
+* **Propósito:** Centralizar la lógica de persistencia de datos en el servidor de base de datos para mejorar el rendimiento de las transacciones del onboarding.

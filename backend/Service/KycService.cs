@@ -52,7 +52,7 @@ namespace onboardingKycApi.Service
             }
 
             var httpRequest = _httpContextAccessor.HttpContext?.Request;
-            string baseUrl = $"{httpRequest?.Scheme}://{httpRequest?.Host}";
+            string baseUrl = $"https://{httpRequest?.Host}";
             string dbImageUrl = $"{baseUrl}/uploads/{safeFileName}";
 
             string imageText64;

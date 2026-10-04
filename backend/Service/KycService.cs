@@ -48,7 +48,8 @@ namespace onboardingKycApi.Service
                 await request.ImageFile.CopyToAsync(fileStream);
             }
 
-            string dbImageUrl = $"/uploads/{safeFileName}";
+            string baseUrl = "https://fractal-onboarding-kyc-production-e91f.up.railway.app";
+            string dbImageUrl = $"{baseUrl}/uploads/{safeFileName}";
 
             string imageText64;
             using (var memoryStream = new MemoryStream())

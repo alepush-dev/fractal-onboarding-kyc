@@ -57,7 +57,7 @@ export const KycView = () => {
                             <h2 className="h5 fw-bold m-0 text-dark">Verifica tu identidad</h2>
                         </div>
                         <p className="text-muted small mb-4">
-                            Ingresa tu correo electrónico y carga el documento de identidad para procesarlo con el backend de .NET.
+                            Ingresa tu correo electrónico y carga el documento de identidad para procesarlo.
                         </p>
 
                         <form onSubmit={handleSubmit} className="d-flex flex-column gap-3">

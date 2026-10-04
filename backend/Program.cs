@@ -36,6 +36,19 @@ app.UseHttpsRedirection();
 //carpeta de archivos
 app.UseStaticFiles();
 
+//Exponer explícitamente la carpeta "uploads" de forma física
+var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
+});
+
 //seguridad yrutas
 app.UseAuthorization();
 app.MapControllers();

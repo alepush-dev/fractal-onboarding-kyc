@@ -1,0 +1,160 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|c:\\users\\hp\\onedrive\\desktop\\datos\\fractal\\onboardingkycweb\\backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|solutionrelative:backend\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|c:\\users\\hp\\onedrive\\desktop\\datos\\fractal\\onboardingkycweb\\backend\\service\\kycservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|solutionrelative:backend\\service\\kycservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|c:\\users\\hp\\onedrive\\desktop\\datos\\fractal\\onboardingkycweb\\backend\\service\\ikycservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|solutionrelative:backend\\service\\ikycservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|c:\\users\\hp\\onedrive\\desktop\\datos\\fractal\\onboardingkycweb\\backend\\controllers\\kyccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|solutionrelative:backend\\controllers\\kyccontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|c:\\users\\hp\\onedrive\\desktop\\datos\\fractal\\onboardingkycweb\\backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|solutionrelative:backend\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|c:\\users\\hp\\onedrive\\desktop\\datos\\fractal\\onboardingkycweb\\backend\\models\\kycextrationresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|solutionrelative:backend\\models\\kycextrationresult.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|c:\\users\\hp\\onedrive\\desktop\\datos\\fractal\\onboardingkycweb\\backend\\models\\kycresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{77F60184-A0ED-EF29-D9A9-00B889D6B862}|backend\\onboardingKycApi.csproj|solutionrelative:backend\\models\\kycresponsemodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 833,
+          "SelectedChildIndex": -1,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{34e76e81-ee4a-11d0-ae2e-00a0c90fffc3}"
+            }
+          ]
+        },
+        {
+          "DockedWidth": 891,
+          "SelectedChildIndex": 6,
+          "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{004be353-6879-467c-9d1e-9ac23cdf6d49}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:2:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "KycExtrationResult.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Models\\KycExtrationResult.cs",
+              "RelativeDocumentMoniker": "backend\\Models\\KycExtrationResult.cs",
+              "ToolTip": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Models\\KycExtrationResult.cs",
+              "RelativeToolTip": "backend\\Models\\KycExtrationResult.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-03T21:57:46.776Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "IKycService.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Service\\IKycService.cs",
+              "RelativeDocumentMoniker": "backend\\Service\\IKycService.cs",
+              "ToolTip": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Service\\IKycService.cs",
+              "RelativeToolTip": "backend\\Service\\IKycService.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-03T21:57:30.656Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "KycService.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Service\\KycService.cs",
+              "RelativeDocumentMoniker": "backend\\Service\\KycService.cs",
+              "ToolTip": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Service\\KycService.cs",
+              "RelativeToolTip": "backend\\Service\\KycService.cs",
+              "ViewState": "AgIAALsAAAAAAAAAAAAkwL4AAAAJAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-03T21:05:17.038Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Program.cs",
+              "RelativeDocumentMoniker": "backend\\Program.cs",
+              "ToolTip": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Program.cs",
+              "RelativeToolTip": "backend\\Program.cs",
+              "ViewState": "AgIAACYAAAAAAAAAAAAAACoAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-03T20:26:45.708Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "KycController.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Controllers\\KycController.cs",
+              "RelativeDocumentMoniker": "backend\\Controllers\\KycController.cs",
+              "ToolTip": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Controllers\\KycController.cs",
+              "RelativeToolTip": "backend\\Controllers\\KycController.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAgwEwAAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-03T20:03:02.714Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\appsettings.json",
+              "RelativeDocumentMoniker": "backend\\appsettings.json",
+              "ToolTip": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\appsettings.json",
+              "RelativeToolTip": "backend\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAoAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-10-03T14:25:17.373Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "KycResponseModel.cs",
+              "DocumentMoniker": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Models\\KycResponseModel.cs",
+              "RelativeDocumentMoniker": "backend\\Models\\KycResponseModel.cs",
+              "ToolTip": "C:\\Users\\HP\\OneDrive\\Desktop\\DATOS\\Fractal\\onboardingKycWeb\\backend\\Models\\KycResponseModel.cs",
+              "RelativeToolTip": "backend\\Models\\KycResponseModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-10-03T14:25:03.492Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

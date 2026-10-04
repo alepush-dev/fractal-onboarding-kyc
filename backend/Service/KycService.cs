@@ -59,7 +59,7 @@ namespace onboardingKycApi.Service
             }
 
             // Llamar a la API de Gemini Flash
-            var apiKey = "AQ.Ab8RN6JInskCGgS3Chw7FNsp3lEGeDPeYp5Y1X7hJsA2v_5bfQ";
+            var apiKey = _configuration["GeminiSettings:ApiKey"];
             var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={apiKey}";
 
             using var httpClient = new HttpClient();

@@ -38,7 +38,7 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 //Exponer explícitamente la carpeta "uploads" de forma física
-var uploadsPath = Path.Combine(builder.Environment.ContentRootPath, "uploads");
+var uploadsPath = Path.Combine(builder.Environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads");
 if (!Directory.Exists(uploadsPath))
 {
     Directory.CreateDirectory(uploadsPath);

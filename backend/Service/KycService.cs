@@ -28,9 +28,17 @@ namespace onboardingKycApi.Service
             {
                 throw new ArgumentException("No se ha adjuntado ninguna imagen.");
             }
-     
 
-            //  Guardar la imagen físicamente en el servidor para obtener la ImageUrl      
+            // 1. Leemos los bytes una sola vez de forma segura
+            byte[] fileBytes;
+            using (var memoryStream = new MemoryStream())
+            {
+                await request.ImageFile.CopyToAsync(memoryStream);
+                fileBytes = memoryStream.ToArray();
+            }
+            string imageText64 = Convert.ToBase64String(fileBytes);
+
+            // 2. Guardar físicamente usando los bytes en lugar de re-copiar el stream
             string webRootPath = _environment.WebRootPath;
             if (string.IsNullOrEmpty(webRootPath))
             {
@@ -46,10 +54,7 @@ namespace onboardingKycApi.Service
             string safeFileName = request.ImageFile.FileName.Replace(" ", "_");
             string filePath = Path.Combine(uploadsFolder, safeFileName);
 
-            using (var fileStream = new FileStream(filePath, FileMode.Create))
-            {
-                await request.ImageFile.CopyToAsync(fileStream);
-            }
+            await File.WriteAllBytesAsync(filePath, fileBytes);
 
             var httpRequest = _httpContextAccessor.HttpContext?.Request;
             string baseUrl = $"https://{httpRequest?.Host}";

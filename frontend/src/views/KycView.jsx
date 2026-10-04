@@ -129,7 +129,7 @@ export const KycView = () => {
                                         style={{ width: '100%', height: '160px' }}
                                     >
                                         <img
-                                            src={`${(import.meta.env.VITE_API_URL || 'https://localhost:7222/api').replace(/\/api\/?$/, '')}${result.imageUrl}`}
+                                            src={result.imageUrl}
                                             alt="Documento de identidad"
                                             style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                         />

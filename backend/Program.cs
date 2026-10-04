@@ -18,6 +18,7 @@ builder.Services.AddHttpClient();
 builder.Services.AddScoped<IKycService, KycService>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddHttpContextAccessor();
 
 var app = builder.Build();
 

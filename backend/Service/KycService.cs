@@ -4,18 +4,21 @@ using onboardingKycApi.Models;
 using System.Buffers.Text;
 using System.Text.Json;
 
+
 namespace onboardingKycApi.Service
 {
     public class KycService : IKycService
     {
         private readonly IWebHostEnvironment _environment;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _configuration;
 
         //Inyección nueva para obtener la ruta física de la aplicación y guardar la imagen
-        public KycService(IWebHostEnvironment environment, IConfiguration configuration)
+        public KycService(IWebHostEnvironment environment, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
         {
             _environment = environment;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         //Método de procesamiento adaptado para retornar KycResponseModel
@@ -48,7 +51,9 @@ namespace onboardingKycApi.Service
                 await request.ImageFile.CopyToAsync(fileStream);
             }
 
-            string baseUrl = "https://fractal-onboarding-kyc-production-e91f.up.railway.app";
+            svar httpRequest = _httpContextAccessor.HttpContext?.Request;
+            string baseUrl = $"{httpRequest?.Scheme}://{httpRequest?.Host}";
+
             string dbImageUrl = $"{baseUrl}/uploads/{safeFileName}";
 
             string imageText64;

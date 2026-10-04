@@ -60,14 +60,6 @@ namespace onboardingKycApi.Service
             string baseUrl = $"https://{httpRequest?.Host}";
             string dbImageUrl = $"{baseUrl}/uploads/{safeFileName}";
 
-            string imageText64;
-            using (var memoryStream = new MemoryStream())
-            {
-                await request.ImageFile.CopyToAsync(memoryStream);
-                byte[] arregloDeBytes = memoryStream.ToArray();
-                imageText64 = Convert.ToBase64String(arregloDeBytes);
-            }
-
             // Llamar a la API de Gemini Flash
             var apiKey = _configuration["GeminiSettings:ApiKey"];
             var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={apiKey}";
@@ -99,7 +91,7 @@ namespace onboardingKycApi.Service
             var jsonPaload = System.Text.Json.JsonSerializer.Serialize(requestBody);
             int maxIntentos = 5;
             int intentoActual = 0;
-            HttpResponseMessage response = null;
+            HttpResponseMessage? response = null;
 
             while (intentoActual < maxIntentos)
             {
@@ -125,10 +117,10 @@ namespace onboardingKycApi.Service
                 }
             }
 
-            if (!response.IsSuccessStatusCode)
+            if (response == null || !response.IsSuccessStatusCode)
             {
-                var errorDetails = await response.Content.ReadAsStringAsync();
-                throw new HttpRequestException($"Error al comunicarse con la API de Gemini tras varios reintentos: {response.ReasonPhrase}. Detalles: {errorDetails}");
+                var errorDetails = response != null ? await response.Content.ReadAsStringAsync() : "Sin respuesta del servidor";
+                throw new HttpRequestException($"Error al comunicarse con la API de Gemini tras varios reintentos: {response?.ReasonPhrase}. Detalles: {errorDetails}");
             }
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
@@ -140,7 +132,7 @@ namespace onboardingKycApi.Service
                                    .GetProperty("content")
                                    .GetProperty("parts")[0]
                                    .GetProperty("text");
-            string data_str = textResponse.GetString();
+            string data_str = textResponse.GetString() ?? string.Empty;
 
             string cleanJson = data_str.Replace("```json", "").Replace("```", "").Trim();
 
@@ -200,7 +192,7 @@ namespace onboardingKycApi.Service
         public async Task<IEnumerable<KycResponseModel>> ObtenerRegistrosAsync()
         {
             var listaRegistros = new List<KycResponseModel>();
-            string connectionString = _configuration.GetConnectionString("DefaultConnection");
+            string connectionString = _configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             {

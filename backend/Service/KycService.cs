@@ -51,9 +51,8 @@ namespace onboardingKycApi.Service
                 await request.ImageFile.CopyToAsync(fileStream);
             }
 
-            svar httpRequest = _httpContextAccessor.HttpContext?.Request;
+            var httpRequest = _httpContextAccessor.HttpContext?.Request;
             string baseUrl = $"{httpRequest?.Scheme}://{httpRequest?.Host}";
-
             string dbImageUrl = $"{baseUrl}/uploads/{safeFileName}";
 
             string imageText64;

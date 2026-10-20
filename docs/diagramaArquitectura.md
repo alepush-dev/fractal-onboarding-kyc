@@ -13,9 +13,11 @@ flowchart LR
             direction TB
             C["<b>Controllers</b><br/>KycController<br/>POST /api/Kyc/process<br/>GET /api/Kyc/records"]
             S["<b>Service</b><br/>IKycService / KycService<br/>Validación · Llamada a IA<br/>Reintentos 429/503 · Parseo JSON"]
+            R["<b>Repository</b><br/>IKycRepository / KycRepository<br/>Acceso a MySQL"]
             M["<b>Models</b><br/>KycRequest<br/>KycResponseModel"]
-            UP[("wwwroot/uploads<br/>Imágenes")]
+            UP[("wwwroot/uploads<br/>Imágenes con nombre GUID")]
             C -->|"Inyección de dependencias"| S
+            S -->|"Inyección de dependencias"| R
             C -.-> M
             S -.-> M
             S -->|"Guarda archivo"| UP
@@ -27,11 +29,10 @@ flowchart LR
 
     U -->|"Correo + foto del DNI"| FE
     FE -->|"HTTPS · multipart/form-data"| C
-    C -->|"JSON (200 / 400 / 500)"| FE
+    C -->|"JSON (200 / 400 / 502 / 500)"| FE
     S -->|"HTTPS · imagen Base64 + prompt<br/>API Key en variable de entorno"| AI
     AI -->|"JSON: FullName, DocumentNumber, Confidence"| S
-    C -->|"CALL sp_InsertOnboardingRecord<br/>MySqlConnector"| DB
-    S -->|"SELECT historial"| DB
+    R -->|"CALL sp_InsertOnboardingRecord<br/>SELECT historial<br/>MySqlConnector"| DB
 ```
 
 ## Componentes
@@ -39,8 +40,9 @@ flowchart LR
 | Capa | Tecnología | Responsabilidad |
 |---|---|---|
 | Frontend | React + Vite (Netlify) | Captura correo e imagen, muestra el resultado y el historial |
-| Controller | ASP.NET Core | Recibe la petición HTTP, valida datos obligatorios y devuelve la respuesta |
-| Service | C# | Lógica de negocio: guarda la imagen, llama a Gemini, interpreta su respuesta |
+| Controller | ASP.NET Core | Recibe la petición HTTP, delega al Service y traduce el resultado a un código HTTP (200/400/502/500) |
+| Service | C# | Lógica de negocio: valida el archivo, llama a Gemini, interpreta su respuesta y guarda la imagen |
+| Repository | C# + MySqlConnector | Único punto de acceso a la base de datos |
 | Models | C# | Definen la forma de los datos que entran y salen de la API |
 | IA / OCR | Gemini Flash | Extrae nombre, número de documento y nivel de confianza |
 | Base de datos | MySQL (Railway) | Persistencia mediante Stored Procedure |

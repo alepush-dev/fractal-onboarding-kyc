@@ -27,6 +27,7 @@ A full-stack web application designed for automated identity document processing
 │   ├── Controllers/           # API Endpoints (KycController)
 │   ├── Models/                # Data transfer and response models (KycRequest, KycResponseModel)
 │   ├── Service/               # Business logic & Gemini integration (KycService, IKycService)
+│   ├── Repository/            # Data access to MySQL via Stored Procedures (KycRepository, IKycRepository)
 │   ├── wwwroot/uploads/       # Physical static storage for uploaded documents
 │   └── Program.cs             # DI, CORS, and Static files configuration
 └── frontend/

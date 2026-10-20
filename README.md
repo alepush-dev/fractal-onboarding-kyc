@@ -88,7 +88,7 @@ Navigate to your backend project directory and configure your local MySQL connec
     "DefaultConnection": "Server=localhost;Database=s_voto_lima;Uid=root;Pwd=your_mysql_password;"
   },
   "GeminiSettings": {
-    "ApiKey": "AQ.Ab8RN6LqgdjqltKDDdQ-_mFzwh9xe_O5eAZjwWSoZzC0H0yQCQ"
+    "ApiKey": "API_KEY"
   },
   "Logging": {
     "LogLevel": {

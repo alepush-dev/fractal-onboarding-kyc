@@ -1,3 +1,4 @@
+using onboardingKycApi.Repository;
 using onboardingKycApi.Service;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,7 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHttpClient();
+builder.Services.AddScoped<IKycRepository, KycRepository>();
 builder.Services.AddScoped<IKycService, KycService>();
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

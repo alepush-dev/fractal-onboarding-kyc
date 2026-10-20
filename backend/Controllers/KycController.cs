@@ -1,95 +1,68 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MySqlConnector;
 using onboardingKycApi.Models;
 using onboardingKycApi.Service;
-using System.Data;
+using System.Text.Json;
 
 namespace onboardingKycApi.Controllers
 {
+    // El Controller solo recibe la petición HTTP, delega al Service y traduce el resultado a un código HTTP
     [Route("api/[controller]")]
     [ApiController]
     public class KycController : ControllerBase
     {
         private readonly IKycService _kycService;
-        private readonly IConfiguration _configuration;
+        private readonly ILogger<KycController> _logger;
 
-        //Recibimo los servicios necesario para que funcione el controlador
-        public KycController(IKycService kycService, IConfiguration configuration)
+        public KycController(IKycService kycService, ILogger<KycController> logger)
         {
             _kycService = kycService;
-            _configuration = configuration;
+            _logger = logger;
         }
 
-        //Endpoint para recibir la foto y el correo, procesar con la IA y guardar en bd
+        // POST api/Kyc/process: recibe correo + foto, la procesa con IA y la registra
         [HttpPost("process")]
         public async Task<IActionResult> ProcessKyc([FromForm] KycRequest request)
         {
-
-            if (request.ImageFile == null || string.IsNullOrEmpty(request.Email))
-            {
-                return BadRequest("El correo y la imagen del documento son obligatorios.");
-            }
-
             try
             {
-                //Mandamos la imagen a procesar con Gemini y guardamos el archivo localmente
-                var kycResult = await _kycService.ProcessKycAsync(request);
-
-                string imageUrl = kycResult.ImageUrl;
-
-
-                //Nos conectamos a MySQL para registrar los datos usando el Stored Procedure
-                string connectionString = _configuration.GetConnectionString("DefaultConnection");
-
-                using (MySqlConnection connection = new MySqlConnection(connectionString))
-                {
-                    await connection.OpenAsync();
-
-                    using (MySqlCommand cmd = new MySqlCommand("sp_InsertOnboardingRecord", connection))
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-
-                        //Parametros
-                        cmd.Parameters.AddWithValue("@p_Email", request.Email);
-                        cmd.Parameters.AddWithValue("@p_FullName", kycResult.FullName);
-                        cmd.Parameters.AddWithValue("@p_DocumentNumber", kycResult.DocumentNumber);
-                        cmd.Parameters.AddWithValue("@p_ImageUrl", imageUrl);
-                        cmd.Parameters.AddWithValue("@p_OcrConfidence", kycResult.Confidence);
-
-                        object result = await cmd.ExecuteScalarAsync();
-
-                        //Respuestas
-                        return Ok(new KycResponseModel
-                        {
-                            Email = request.Email,
-                            FullName = kycResult.FullName,
-                            DocumentNumber = kycResult.DocumentNumber,
-                            Confidence = kycResult.Confidence,
-                            ImageUrl = imageUrl,
-                            CreatedAt = DateTime.Now
-                        });
-                    }
-                }
+                var resultado = await _kycService.ProcessKycAsync(request);
+                return Ok(resultado); // 200
+            }
+            catch (ArgumentException ex)
+            {
+                // Error del usuario (datos inválidos)
+                return BadRequest(new { message = ex.Message }); // 400
+            }
+            catch (Exception ex) when (ex is HttpRequestException || ex is JsonException)
+            {
+                // Falló el servicio externo de IA o devolvió algo que no se pudo leer
+                _logger.LogError(ex, "Error al procesar el documento con la IA.");
+                return StatusCode(StatusCodes.Status502BadGateway,
+                    new { message = "El servicio de IA no pudo procesar el documento. Intenta nuevamente." });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error interno: " + ex.Message });
+                // Error inesperado: se registra el detalle, pero al usuario no se le muestra
+                _logger.LogError(ex, "Error inesperado en ProcessKyc.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { message = "Ocurrió un error interno. Intenta nuevamente." });
             }
         }
 
-
-        // Endpoint para traer la lista de todos los registros históricos para la tabla
+        // GET api/Kyc/records: historial de registros para la tabla de clientes
         [HttpGet("records")]
         public async Task<IActionResult> GetRecords()
         {
             try
             {
-                var records = await _kycService.ObtenerRegistrosAsync();
-                return Ok(records);
+                var registros = await _kycService.ObtenerRegistrosAsync();
+                return Ok(registros);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Error al obtener los registros: " + ex.Message });
+                _logger.LogError(ex, "Error al obtener los registros.");
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    new { message = "Error al obtener los registros." });
             }
         }
     }

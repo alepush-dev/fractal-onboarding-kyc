@@ -7,12 +7,10 @@
 	  <InterceptorsNamespaces>$(InterceptorsNamespaces);Microsoft.AspNetCore.OpenApi.Generated</InterceptorsNamespaces>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Google.GenAI" Version="1.22.0" />
-    <PackageReference Include="Google_GenerativeAI" Version="3.6.7" />
+  <ItemGroup>    
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.12" />
     <PackageReference Include="MySqlConnector" Version="2.6.2" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+
   </ItemGroup>
 
 </Project>

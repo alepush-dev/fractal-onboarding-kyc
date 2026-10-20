@@ -61,13 +61,13 @@ export const ClientesView = () => {
                                 </tr>
                             ) : (
                                 records.map((record, index) => (
-                                    <tr key={index}>
+                                    <tr key={record.id ?? record.Id ?? index}>
                                         <td className="fw-semibold text-dark">{record.Email || record.email}</td>
                                         <td>{record.FullName || record.fullName}</td>
                                         <td><span className="font-monospace">{record.DocumentNumber || record.documentNumber}</span></td>
                                         <td>
                                             <span className="badge bg-success-subtle text-success border border-success-subtle">
-                                                {record.Confidence || record.confidence}%
+                                                {Math.round((record.Confidence ?? record.confidence ?? 0) * 100)}%
                                             </span>
                                         </td>
                                         <td>{new Date(record.CreatedAt || record.createdAt).toLocaleString()}</td>

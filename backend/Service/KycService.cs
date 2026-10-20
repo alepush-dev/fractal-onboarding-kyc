@@ -1,70 +1,104 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using MySqlConnector;
-using onboardingKycApi.Models;
-using System.Buffers.Text;
+﻿using onboardingKycApi.Models;
+using onboardingKycApi.Repository;
+using System.Net.Mail;
+using System.Text;
 using System.Text.Json;
-
 
 namespace onboardingKycApi.Service
 {
+    // Lógica de negocio: valida, llama a la IA, guarda la imagen y registra en la BD
     public class KycService : IKycService
     {
+        // Reglas de validación del archivo
+        private static readonly string[] TiposPermitidos = { "image/jpeg", "image/png", "image/webp" };
+        private const long TamanoMaximoBytes = 5 * 1024 * 1024; // 5 MB
+
+        // Reintentos ante Gemini saturado (503) o límite de peticiones (429)
+        private const int MaxIntentos = 5;
+
+        private readonly IKycRepository _repository;
+        private readonly IHttpClientFactory _httpClientFactory;
         private readonly IWebHostEnvironment _environment;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IConfiguration _configuration;
+        private readonly ILogger<KycService> _logger;
 
-        //Inyección nueva para obtener la ruta física de la aplicación y guardar la imagen
-        public KycService(IWebHostEnvironment environment, IConfiguration configuration, IHttpContextAccessor httpContextAccessor)
+        public KycService(
+            IKycRepository repository,
+            IHttpClientFactory httpClientFactory,
+            IWebHostEnvironment environment,
+            IHttpContextAccessor httpContextAccessor,
+            IConfiguration configuration,
+            ILogger<KycService> logger)
         {
+            _repository = repository;
+            _httpClientFactory = httpClientFactory;
             _environment = environment;
-            _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _configuration = configuration;
+            _logger = logger;
         }
 
-        //Método de procesamiento adaptado para retornar KycResponseModel
         public async Task<KycResponseModel> ProcessKycAsync(KycRequest request)
         {
-            if (request.ImageFile == null || request.ImageFile.Length == 0)
-            {
-                throw new ArgumentException("No se ha adjuntado ninguna imagen.");
-            }
+            // 1. Validar los datos de entrada
+            ValidarSolicitud(request);
 
-            // 1. Leemos los bytes una sola vez de forma segura
+            // 2. Leer la imagen una sola vez
             byte[] fileBytes;
             using (var memoryStream = new MemoryStream())
             {
                 await request.ImageFile.CopyToAsync(memoryStream);
                 fileBytes = memoryStream.ToArray();
             }
-            string imageText64 = Convert.ToBase64String(fileBytes);
 
-            // 2. Guardar físicamente usando los bytes en lugar de re-copiar el stream
-            string webRootPath = _environment.WebRootPath;
-            if (string.IsNullOrEmpty(webRootPath))
+            // 3. Extraer los datos con la IA
+            KycResponseResult datos = await ExtraerDatosConGeminiAsync(fileBytes, request.ImageFile.ContentType);
+
+            // 4. Guardar la imagen solo si la IA respondió bien (así no quedan archivos huérfanos)
+            string imageUrl = await GuardarImagenAsync(fileBytes, request.ImageFile.FileName);
+
+            // 5. Registrar en la base de datos y obtener el Id real
+            int nuevoId = await _repository.InsertarRegistroAsync(request.Email, datos, imageUrl);
+
+            return new KycResponseModel
             {
-                webRootPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-            }
+                Id = nuevoId,
+                Email = request.Email,
+                FullName = datos.FullName,
+                DocumentNumber = datos.DocumentNumber,
+                Confidence = datos.Confidence,
+                ImageUrl = imageUrl,
+                CreatedAt = DateTime.Now
+            };
+        }
 
-            string uploadsFolder = Path.Combine(webRootPath, "uploads");
-            if (!Directory.Exists(uploadsFolder))
-            {
-                Directory.CreateDirectory(uploadsFolder);
-            }
+        public Task<IEnumerable<KycResponseModel>> ObtenerRegistrosAsync()
+        {
+            return _repository.ObtenerRegistrosAsync();
+        }
 
-            string safeFileName = request.ImageFile.FileName.Replace(" ", "_");
-            string filePath = Path.Combine(uploadsFolder, safeFileName);
+        // ---------- Métodos privados ----------
 
-            await File.WriteAllBytesAsync(filePath, fileBytes);
+        private static void ValidarSolicitud(KycRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Email) || !MailAddress.TryCreate(request.Email, out _))
+                throw new ArgumentException("El correo electrónico no es válido.");
 
-            var httpRequest = _httpContextAccessor.HttpContext?.Request;
-            string baseUrl = $"https://{httpRequest?.Host}";
-            string dbImageUrl = $"{baseUrl}/uploads/{safeFileName}";
+            if (request.ImageFile == null || request.ImageFile.Length == 0)
+                throw new ArgumentException("No se ha adjuntado ninguna imagen.");
 
-            // Llamar a la API de Gemini Flash
+            if (!TiposPermitidos.Contains(request.ImageFile.ContentType?.ToLowerInvariant()))
+                throw new ArgumentException("Formato no soportado. Solo se aceptan imágenes JPG, PNG o WEBP.");
+
+            if (request.ImageFile.Length > TamanoMaximoBytes)
+                throw new ArgumentException("La imagen supera el tamaño máximo de 5 MB.");
+        }
+
+        private async Task<KycResponseResult> ExtraerDatosConGeminiAsync(byte[] fileBytes, string mimeType)
+        {
             var apiKey = _configuration["GeminiSettings:ApiKey"];
-            var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key={apiKey}";
-
-            using var httpClient = new HttpClient();
+            const string url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent";
 
             var requestBody = new
             {
@@ -74,154 +108,142 @@ namespace onboardingKycApi.Service
                     {
                         parts = new object[]
                         {
-                            new { text = "Analiza este documento de identidad y devuélveme un JSON puro con: FullName, DocumentNumber y Confidence." },
                             new
                             {
-                                inline_data = new
-                                {
-                                    mime_type = request.ImageFile.ContentType,
-                                    data = imageText64
-                                }
-                            }
+                                text = "Analiza este documento de identidad. Devuelve solo un JSON con estas claves: " +
+                                       "FullName (texto), DocumentNumber (texto) y Confidence (número entre 0 y 1). " +
+                                       "Si no encuentras un dato, usa null."
+                            },
+                            new { inline_data = new { mime_type = mimeType, data = Convert.ToBase64String(fileBytes) } }
                         }
                     }
-                }
+                },
+                // Le pedimos a Gemini que responda directamente en JSON
+                generationConfig = new { responseMimeType = "application/json" }
             };
 
-            var jsonPaload = System.Text.Json.JsonSerializer.Serialize(requestBody);
-            int maxIntentos = 5;
-            int intentoActual = 0;
+            string jsonPayload = JsonSerializer.Serialize(requestBody);
+
+            // HttpClient creado por la fábrica: reutiliza conexiones
+            var httpClient = _httpClientFactory.CreateClient();
             HttpResponseMessage? response = null;
 
-            while (intentoActual < maxIntentos)
+            for (int intento = 1; intento <= MaxIntentos; intento++)
             {
-                var content = new StringContent(jsonPaload, System.Text.Encoding.UTF8, "application/json");
-                response = await httpClient.PostAsync(url, content);
+                using var mensaje = new HttpRequestMessage(HttpMethod.Post, url)
+                {
+                    Content = new StringContent(jsonPayload, Encoding.UTF8, "application/json")
+                };
+                // La API key va en un header, no en la URL, para que no quede en logs
+                mensaje.Headers.Add("x-goog-api-key", apiKey);
+
+                response = await httpClient.SendAsync(mensaje);
 
                 if (response.IsSuccessStatusCode)
-                {
                     break;
-                }
 
                 int statusCode = (int)response.StatusCode;
-                if (statusCode != 503 && statusCode != 429)
-                {
+                bool esReintentable = statusCode == 429 || statusCode == 503;
+                if (!esReintentable || intento == MaxIntentos)
                     break;
-                }
 
-                intentoActual++;
-                if (intentoActual < maxIntentos)
-                {
-                    int tiempoEspera = (statusCode == 429) ? 12000 : (2000 * intentoActual);
-                    await Task.Delay(tiempoEspera);
-                }
+                // Backoff: esperamos más en cada intento
+                int espera = statusCode == 429 ? 12000 : 2000 * intento;
+                _logger.LogWarning("Gemini respondió {Status}. Reintento {Intento} en {Espera} ms.", statusCode, intento, espera);
+                await Task.Delay(espera);
             }
 
             if (response == null || !response.IsSuccessStatusCode)
             {
-                var errorDetails = response != null ? await response.Content.ReadAsStringAsync() : "Sin respuesta del servidor";
-                throw new HttpRequestException($"Error al comunicarse con la API de Gemini tras varios reintentos: {response?.ReasonPhrase}. Detalles: {errorDetails}");
+                var detalle = response != null ? await response.Content.ReadAsStringAsync() : "Sin respuesta";
+                _logger.LogError("Error de Gemini: {Status}. {Detalle}", response?.StatusCode, detalle);
+                throw new HttpRequestException("No se pudo procesar el documento con el servicio de IA.");
             }
 
+            // Respuesta de Gemini: candidates[0].content.parts[0].text contiene nuestro JSON
             var jsonResponse = await response.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(jsonResponse);
+            string texto = doc.RootElement
+                .GetProperty("candidates")[0]
+                .GetProperty("content")
+                .GetProperty("parts")[0]
+                .GetProperty("text")
+                .GetString() ?? string.Empty;
 
-            // Interpretar la respuesta de Gemini
-            using var doc = System.Text.Json.JsonDocument.Parse(jsonResponse);
-            var root = doc.RootElement;
-            var textResponse = root.GetProperty("candidates")[0]
-                                   .GetProperty("content")
-                                   .GetProperty("parts")[0]
-                                   .GetProperty("text");
-            string data_str = textResponse.GetString() ?? string.Empty;
+            // Por seguridad limpiamos los ```json que a veces agrega el modelo
+            string cleanJson = texto.Replace("```json", "").Replace("```", "").Trim();
 
-            string cleanJson = data_str.Replace("```json", "").Replace("```", "").Trim();
+            using var innerDoc = JsonDocument.Parse(cleanJson);
+            var datos = innerDoc.RootElement;
 
-            using JsonDocument innerDoc = System.Text.Json.JsonDocument.Parse(cleanJson);
-            var innerRoot = innerDoc.RootElement;
-
-
-            //Extraer el nombre completo del documento detectado
-            string extractedFullName = "No encontrado";
-            if (innerRoot.TryGetProperty("fullName", out var fnElem) && fnElem.ValueKind != System.Text.Json.JsonValueKind.Null)
+            return new KycResponseResult
             {
-                extractedFullName = fnElem.GetString() ?? "No encontrado";
-            }
-            else if (innerRoot.TryGetProperty("FullName", out fnElem) && fnElem.ValueKind != System.Text.Json.JsonValueKind.Null)
-            {
-                extractedFullName = fnElem.GetString() ?? "No encontrado";
-            }
-
-            //Extraer el número del DNI
-            string extractedDocNumber = "No encontrado";
-            if (innerRoot.TryGetProperty("documentNumber", out var dnElem) && dnElem.ValueKind != System.Text.Json.JsonValueKind.Null)
-            {
-                extractedDocNumber = dnElem.GetString() ?? "No encontrado";
-            }
-            else if (innerRoot.TryGetProperty("DocumentNumber", out dnElem) && dnElem.ValueKind != System.Text.Json.JsonValueKind.Null)
-            {
-                extractedDocNumber = dnElem.GetString() ?? "No encontrado";
-            }
-
-            //Extraer el porcentaje de confianza del reconocimiento OCR
-            decimal ocrConfidence = 0.0m;
-            if (innerRoot.TryGetProperty("confidence", out var confElem) && confElem.ValueKind == System.Text.Json.JsonValueKind.Number)
-            {
-                ocrConfidence = confElem.GetDecimal();
-            }
-            else if (innerRoot.TryGetProperty("Confidence", out confElem) && confElem.ValueKind == System.Text.Json.JsonValueKind.Number)
-            {
-                ocrConfidence = confElem.GetDecimal();
-            }
-
-
-            //Retornar el ResponseModel completo para que pinte la tarjeta de la derecha
-            return new KycResponseModel
-            {
-                Id = 1,
-                Email = request.Email,
-                FullName = extractedFullName,
-                DocumentNumber = extractedDocNumber,
-                Confidence = ocrConfidence,
-                ImageUrl = dbImageUrl,
-                CreatedAt = DateTime.Now
+                FullName = LeerTexto(datos, "FullName"),
+                DocumentNumber = LeerTexto(datos, "DocumentNumber"),
+                Confidence = LeerConfianza(datos)
             };
         }
 
-
-        //Método para listar los registros históricos en la tabla de React
-        public async Task<IEnumerable<KycResponseModel>> ObtenerRegistrosAsync()
+        private async Task<string> GuardarImagenAsync(byte[] fileBytes, string nombreOriginal)
         {
-            var listaRegistros = new List<KycResponseModel>();
-            string connectionString = _configuration.GetConnectionString("DefaultConnection") ?? string.Empty;
+            string webRootPath = _environment.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            string uploadsFolder = Path.Combine(webRootPath, "uploads");
+            Directory.CreateDirectory(uploadsFolder); // no hace nada si ya existe
 
-            using (MySqlConnection connection = new MySqlConnection(connectionString))
+            // Nombre único con Guid: evita que un archivo sobrescriba a otro
+            string extension = Path.GetExtension(nombreOriginal).ToLowerInvariant();
+            string nombreArchivo = $"{Guid.NewGuid()}{extension}";
+
+            await File.WriteAllBytesAsync(Path.Combine(uploadsFolder, nombreArchivo), fileBytes);
+
+            var host = _httpContextAccessor.HttpContext?.Request.Host;
+            return $"https://{host}/uploads/{nombreArchivo}";
+        }
+
+        // Lee un campo de texto aunque venga como "FullName" o "fullName", o como número (ej. el DNI)
+        private static string LeerTexto(JsonElement datos, string campo)
+        {
+            if (!BuscarPropiedad(datos, campo, out var valor))
+                return "No encontrado";
+
+            return valor.ValueKind switch
             {
-                await connection.OpenAsync();
+                JsonValueKind.String => valor.GetString() ?? "No encontrado",
+                JsonValueKind.Number => valor.GetRawText(),
+                _ => "No encontrado"
+            };
+        }
 
-                string query = "SELECT Id, Email, FullName, DocumentNumber, OcrConfidence, ImageUrl, CreatedAt FROM clientskyc ORDER BY Id ASC";
+        // Lee la confianza y la deja siempre entre 0 y 1
+        private static decimal LeerConfianza(JsonElement datos)
+        {
+            if (!BuscarPropiedad(datos, "Confidence", out var valor))
+                return 0m;
 
-                using (MySqlCommand cmd = new MySqlCommand(query, connection))
+            decimal confianza = 0m;
+            if (valor.ValueKind == JsonValueKind.Number)
+                confianza = valor.GetDecimal();
+            else if (valor.ValueKind == JsonValueKind.String)
+                decimal.TryParse(valor.GetString()?.Replace("%", ""), System.Globalization.NumberStyles.Number,
+                                 System.Globalization.CultureInfo.InvariantCulture, out confianza);
+
+            if (confianza > 1) confianza /= 100; // si la IA respondió 95 en vez de 0.95
+            return Math.Clamp(confianza, 0m, 1m);
+        }
+
+        // Busca la propiedad sin importar mayúsculas/minúsculas
+        private static bool BuscarPropiedad(JsonElement datos, string campo, out JsonElement valor)
+        {
+            foreach (var propiedad in datos.EnumerateObject())
+            {
+                if (string.Equals(propiedad.Name, campo, StringComparison.OrdinalIgnoreCase))
                 {
-                    using (var reader = await cmd.ExecuteReaderAsync())
-                    {
-                        while (await reader.ReadAsync())
-                        {
-                            listaRegistros.Add(new KycResponseModel
-                            {
-                                Id = reader.GetInt32("Id"),
-                                Email = reader.IsDBNull(reader.GetOrdinal("Email")) ? string.Empty : reader.GetString("Email"),
-                                FullName = reader.IsDBNull(reader.GetOrdinal("FullName")) ? string.Empty : reader.GetString("FullName"),
-                                DocumentNumber = reader.IsDBNull(reader.GetOrdinal("DocumentNumber")) ? string.Empty : reader.GetString("DocumentNumber"),
-                                Confidence = reader.IsDBNull(reader.GetOrdinal("OcrConfidence")) ? 0 : reader.GetDecimal("OcrConfidence"),
-                                ImageUrl = reader.IsDBNull(reader.GetOrdinal("ImageUrl")) ? string.Empty : reader.GetString("ImageUrl"),
-                                CreatedAt = reader.IsDBNull(reader.GetOrdinal("CreatedAt")) ? DateTime.Now : reader.GetDateTime("CreatedAt")
-                            });
-                        }
-                    }
+                    valor = propiedad.Value;
+                    return true;
                 }
             }
-
-            return listaRegistros;
+            valor = default;
+            return false;
         }
     }
 }

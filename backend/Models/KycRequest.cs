@@ -2,8 +2,8 @@
 {
     public class KycRequest
     {
-        public string Email { get; set; }
-        public IFormFile ImageFile { get; set; }
+        public string Email { get; set; } = string.Empty;
+        public IFormFile ImageFile { get; set; } = null!;
     }
 
 }

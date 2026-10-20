@@ -19,7 +19,7 @@ sequenceDiagram
 
     Note over BE: Fase 2: Control de Errores y Seguridad en Backend
     activate BE
-    BE->>BE: Intercepta y valida integridad del archivo
+    BE->>BE: Valida correo, tipo (JPG/PNG/WEBP) y tamaño (máx. 5 MB)
     
     alt Archivo Inválido o Formato No Soportado
         BE-->>FE: HTTP 400 Bad Request (Error descriptivo)
@@ -29,13 +29,23 @@ sequenceDiagram
         Note over BE,AI: Fase 3: Procesamiento Inteligente de Datos (OCR)
         BE->>AI: Envía bytes de imagen + Prompt estructurado (API Key segura)
         activate AI
-        AI-->>BE: Retorna JSON estructurado (Nombre, Documento, Confianza %)
+        AI-->>BE: Retorna JSON estructurado (Nombre, Documento, Confianza 0-1)
         deactivate AI
+
+        alt Gemini saturado (429 / 503)
+            BE->>AI: Reintenta hasta 5 veces con espera creciente (backoff)
+        end
+        alt Gemini falla definitivamente
+            BE-->>FE: HTTP 502 Bad Gateway (mensaje genérico)
+            FE-->>U: Muestra alerta de error
+        end
+
+        BE->>BE: Guarda la imagen con nombre único (GUID)
         
         Note over BE,DB: Fase 4: Persistencia Transaccional por Stored Procedure
         BE->>DB: EXEC sp_InsertOnboardingRecord (Email, FullName, DocumentNumber, OcrConfidence, ImageUrl)
         activate DB
-        DB-->>BE: Retorna ID generado + Confirmación con Timestamp
+        DB-->>BE: Retorna el Id generado (LAST_INSERT_ID)
         deactivate DB
         
         BE-->>FE: HTTP 200 OK (Datos de Onboarding procesados exitosamente)

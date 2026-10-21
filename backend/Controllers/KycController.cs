@@ -19,6 +19,12 @@ namespace onboardingKycApi.Controllers
             _logger = logger;
         }
 
+
+        [ProducesResponseType(typeof(KycResponseModel), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
+        [ProducesResponseType(StatusCodes.Status502BadGateway)]
+
         // POST api/Kyc/process: recibe correo + foto, la procesa con IA y la registra
         [HttpPost("process")]
         public async Task<IActionResult> ProcessKyc([FromForm] KycRequest request)
@@ -32,6 +38,11 @@ namespace onboardingKycApi.Controllers
             {
                 // Error del usuario (datos inválidos)
                 return BadRequest(new { message = ex.Message }); // 400
+            }
+            catch(ImagenIlegibleException ex)
+            {
+                //El Archivo es valido pero su contenido no se pudo leer ( imagen es borrosa)
+                return UnprocessableEntity(new { message = ex.Message }); // 422
             }
             catch (Exception ex) when (ex is HttpRequestException || ex is JsonException)
             {
@@ -49,6 +60,9 @@ namespace onboardingKycApi.Controllers
             }
         }
 
+
+
+        [ProducesResponseType(typeof(IEnumerable<KycResponseModel>), StatusCodes.Status200OK)]
         // GET api/Kyc/records: historial de registros para la tabla de clientes
         [HttpGet("records")]
         public async Task<IActionResult> GetRecords()

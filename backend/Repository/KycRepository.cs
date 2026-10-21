@@ -56,7 +56,9 @@ namespace onboardingKycApi.Repository
                     DocumentNumber = reader.IsDBNull(reader.GetOrdinal("DocumentNumber")) ? string.Empty : reader.GetString("DocumentNumber"),
                     Confidence = reader.IsDBNull(reader.GetOrdinal("OcrConfidence")) ? 0 : reader.GetDecimal("OcrConfidence"),
                     ImageUrl = reader.IsDBNull(reader.GetOrdinal("ImageUrl")) ? string.Empty : reader.GetString("ImageUrl"),
-                    CreatedAt = reader.IsDBNull(reader.GetOrdinal("CreatedAt")) ? DateTime.Now : reader.GetDateTime("CreatedAt")
+                    CreatedAt = reader.IsDBNull(reader.GetOrdinal("CreatedAt")) 
+                    ? DateTime.UtcNow 
+                    : DateTime.SpecifyKind(reader.GetDateTime("CreatedAt"), DateTimeKind.Utc)
                 });
             }
 

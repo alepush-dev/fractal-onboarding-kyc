@@ -16,6 +16,10 @@ namespace onboardingKycApi.Service
         // Reintentos ante Gemini saturado (503) o límite de peticiones (429)
         private const int MaxIntentos = 5;
 
+        // Por debajo de esta confianza consideramos que la imagen no es legible (borrosa, oscura, cortada)
+        private const decimal ConfianzaMinima = 0.6m;
+        private const string NoEncontrado = "No encontrado";
+
         private readonly IKycRepository _repository;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IWebHostEnvironment _environment;
@@ -55,6 +59,9 @@ namespace onboardingKycApi.Service
             // 3. Extraer los datos con la IA
             KycResponseResult datos = await ExtraerDatosConGeminiAsync(fileBytes, request.ImageFile.ContentType);
 
+            // 4. Verificar que la imagen se haya podido leer ( imagen borrosa)
+            ValidarLegilibilidad(datos);
+
             // 4. Guardar la imagen solo si la IA respondió bien (así no quedan archivos huérfanos)
             string imageUrl = await GuardarImagenAsync(fileBytes, request.ImageFile.FileName);
 
@@ -93,6 +100,14 @@ namespace onboardingKycApi.Service
 
             if (request.ImageFile.Length > TamanoMaximoBytes)
                 throw new ArgumentException("La imagen supera el tamaño máximo de 5 MB.");
+        }
+
+        private static void ValidarLegilibilidad(KycResponseResult datos)
+        {
+            bool faltanDatos = datos.FullName == NoEncontrado || datos.DocumentNumber == NoEncontrado;
+            if (faltanDatos || datos.Confidence < ConfianzaMinima)
+                throw new ImagenIlegibleException(
+                    "No pudimos leer el documento. La imagen puede estar borrosa, oscura o cortada. Intenta con una foto más nítida.");
         }
 
         private async Task<KycResponseResult> ExtraerDatosConGeminiAsync(byte[] fileBytes, string mimeType)

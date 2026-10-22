@@ -1,6 +1,17 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { kycService } from '../api/kycService';
 import logoImage from '../assets/image.png';
+
+// Mismas reglas que el backend: así el usuario recibe el aviso al instante, sin esperar al servidor
+const TIPOS_PERMITIDOS = ['image/jpeg', 'image/png', 'image/webp'];
+const TAMANO_MAXIMO_MB = 5;
+
+const validarArchivo = (file) => {
+    if (!file) return 'Selecciona una imagen del documento.';
+    if (!TIPOS_PERMITIDOS.includes(file.type)) return 'Formato no soportado. Solo se aceptan imágenes JPG, PNG o WEBP.';
+    if (file.size > TAMANO_MAXIMO_MB * 1024 * 1024) return `La imagen supera el tamaño máximo de ${TAMANO_MAXIMO_MB} MB.`;
+    return null;
+};
 
 export const KycView = () => {
     const [email, setEmail] = useState('');
@@ -11,8 +22,14 @@ export const KycView = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!email || !imageFile) {
-            setError('Por favor completa el correo y selecciona una imagen.');
+        if (!email) {
+            setError('Por favor ingresa tu correo electrónico.');
+            return;
+        }
+
+        const errorArchivo = validarArchivo(imageFile);
+        if (errorArchivo) {
+            setError(errorArchivo);
             return;
         }
 
@@ -33,9 +50,17 @@ export const KycView = () => {
             setLoading(false);
         }
     };
+    const handleFileChange = (e) => {
+        const file = e.target.files[0] ?? null;
+        setImageFile(file);
+        setResult(null);
+        // Avisamos apenas elige el archivo, no recién al enviar
+        setError(file ? validarArchivo(file) : null);
+    };
+
     return (
 
-        <div className="container-fluid p-5">
+        <div className="container-fluid p-3 p-md-5">
             <br />
             <div className="row mb-5">
                 <div className="col-12 text-center">
@@ -77,8 +102,8 @@ export const KycView = () => {
                                 <input
                                     type="file"
                                     className="form-control"
-                                    accept="image/*"
-                                    onChange={(e) => setImageFile(e.target.files[0])}
+                                    accept="image/jpeg,image/png,image/webp"
+                                    onChange={handleFileChange}
                                     required
                                 />
                             </div>

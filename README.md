@@ -6,7 +6,7 @@ A full-stack web application designed for automated identity document processing
 
 ## Tech Stack & Architecture Justification
 
-* **Frontend**: React (Vite) + Bootstrap + Tailwind CSS
+* **Frontend**: React (Vite) + Bootstrap
   * *Justification*: Provides a responsive, component-driven user interface (`KycView`, `ClientesView`, `Navbar`, `Sidebar`) allowing users to input their email, upload identity documents, monitor loading states in real-time, and view extracted results alongside historical records.
 * **Backend**: ASP.NET Core Web API (.NET / C#)
   * *Justification*: Chosen for its high performance, robust dependency injection architecture, strict typing, and seamless handling of multipart form-data for file uploads (`KycController`, `KycService`).

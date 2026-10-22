@@ -25,14 +25,11 @@ builder.Services.AddHttpContextAccessor();
 var app = builder.Build();
 
 //entorno de desarrollo
-if (app.Environment.IsDevelopment())
+app.MapOpenApi();
+app.UseSwaggerUI(options =>
 {
-    app.MapOpenApi();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/openapi/v1.json", "Onboarding KYC API v1");
-    });
-}
+    options.SwaggerEndpoint("/openapi/v1.json", "Onboarding KYC API v1");
+});
 
 //aplicar CORS
 app.UseCors("AllowReactApp");
